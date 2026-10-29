@@ -137,8 +137,6 @@ export class BedsideClockComponent {
     if (!this.container) return;
 
     const screen = this.container.querySelector<HTMLDivElement>('#bedside-screen');
-    const overlay = this.container.querySelector<HTMLDivElement>('#bedside-controls-overlay');
-    const hint = this.container.querySelector<HTMLDivElement>('#bedside-hint');
 
     screen?.addEventListener('click', (e) => {
       // Don't trigger toggle if clicking a button

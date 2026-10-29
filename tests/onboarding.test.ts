@@ -38,10 +38,11 @@ describe('OnboardingComponent Flow', () => {
     // Completion callback should have fired with structured profile
     expect(onComplete).toHaveBeenCalledTimes(1);
     expect(completedProfile).not.toBeNull();
-    expect(completedProfile?.issueType).toBe('falling-asleep');
-    expect(completedProfile?.durationMinutes).toBe(45);
-    expect(completedProfile?.soundscape).toBe('rain');
-    expect(completedProfile?.beatVolume).toBe(0.7);
-    expect(completedProfile?.soundscapeVolume).toBe(0.5);
+    const profile = completedProfile as unknown as SleepProfile;
+    expect(profile.issueType).toBe('falling-asleep');
+    expect(profile.durationMinutes).toBe(45);
+    expect(profile.soundscape).toBe('rain');
+    expect(profile.beatVolume).toBe(0.7);
+    expect(profile.soundscapeVolume).toBe(0.5);
   });
 });

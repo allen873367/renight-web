@@ -1,20 +1,102 @@
 import './style.css';
+import { SoundEngine } from './audio/engine';
+import { StorageService } from './utils/storage';
+import { OnboardingComponent } from './components/Onboarding';
+import { DashboardComponent } from './components/Dashboard';
+import { BedsideClockComponent } from './components/BedsideClock';
+import { MorningModal } from './components/MorningModal';
+import { SleepProfile } from './types/sleep';
 
-const app = document.querySelector<HTMLDivElement>('#app');
+class App {
+  private appRoot: HTMLElement;
+  private engine: SoundEngine;
+  private currentView: 'onboarding' | 'dashboard' | 'bedside' = 'dashboard';
+  private bedsideComponent: BedsideClockComponent | null = null;
+  private dashboardComponent: DashboardComponent | null = null;
 
-if (app) {
-  app.innerHTML = `
-    <div class="flex-1 flex flex-col items-center justify-center p-6 text-center select-none">
-      <div class="w-12 h-12 rounded-full border border-slate-800 flex items-center justify-center mb-4">
-        <svg class="w-6 h-6 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 3v18" opacity="0.3" />
-          <path d="M3 12h18" opacity="0.3" />
-          <path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5" />
-        </svg>
-      </div>
-      <h1 class="text-xl font-medium tracking-wider text-slate-100">RENIGHT</h1>
-      <p class="mt-2 text-xs text-dim tracking-widest uppercase">Monaural Brainwave Synchronization</p>
-    </div>
-  `;
+  constructor() {
+    const root = document.querySelector<HTMLDivElement>('#app');
+    if (!root) throw new Error('#app element not found');
+    this.appRoot = root;
+    this.engine = new SoundEngine();
+
+    // Hook engine tick to update components
+    this.engine.onTick((state) => {
+      if (this.currentView === 'bedside' && this.bedsideComponent) {
+        this.bedsideComponent.updateState(state);
+      }
+    });
+
+    this.initPWA();
+    this.initView();
+  }
+
+  private initPWA(): void {
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('Service Worker registration failed:', err);
+        });
+      });
+    }
+  }
+
+  private initView(): void {
+    const profile = StorageService.getProfile();
+    if (!profile) {
+      this.showOnboarding();
+    } else {
+      this.showDashboard(profile);
+      // If returning user and hasn't checked in today, show gentle morning modal
+      if (MorningModal.shouldShow()) {
+        const modal = new MorningModal();
+        modal.render(document.body, () => {});
+      }
+    }
+  }
+
+  private showOnboarding(): void {
+    this.currentView = 'onboarding';
+    this.appRoot.innerHTML = '';
+    const onboarding = new OnboardingComponent();
+    onboarding.render(this.appRoot, (newProfile: SleepProfile) => {
+      StorageService.saveProfile(newProfile);
+      this.showDashboard(newProfile);
+    });
+  }
+
+  private showDashboard(profile: SleepProfile): void {
+    this.currentView = 'dashboard';
+    this.appRoot.innerHTML = '';
+    this.dashboardComponent = new DashboardComponent(this.engine, profile);
+    this.dashboardComponent.render(this.appRoot, {
+      onStart: async () => {
+        // Unlock Web Audio context via user touch gesture
+        await this.engine.init();
+        this.engine.start(profile);
+        this.showBedside();
+      },
+      onEditProfile: () => {
+        this.showOnboarding();
+      }
+    });
+  }
+
+  private showBedside(): void {
+    this.currentView = 'bedside';
+    this.appRoot.innerHTML = '';
+    this.bedsideComponent = new BedsideClockComponent(this.engine);
+    this.bedsideComponent.render(this.appRoot, () => {
+      // On exit, return to dashboard
+      const profile = StorageService.getProfile();
+      if (profile) {
+        this.showDashboard(profile);
+      } else {
+        this.showOnboarding();
+      }
+    });
+  }
 }
+
+// Start application
+new App();
