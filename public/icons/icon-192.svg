@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" fill="#000000" rx="42"/>
+  <circle cx="96" cy="96" r="64" stroke="#1e293b" stroke-width="2" fill="none"/>
+  <circle cx="96" cy="96" r="48" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+  <!-- Elegant crescent moon & sound wave -->
+  <path d="M96 52 A44 44 0 0 0 140 96 A44 44 0 1 1 96 52 Z" fill="#38bdf8"/>
+  <circle cx="76" cy="96" r="4" fill="#38bdf8"/>
+  <circle cx="60" cy="96" r="2.5" fill="#38bdf8" opacity="0.6"/>
+</svg>
