@@ -21,3 +21,35 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
+
+/* Custom Range Slider styling for smooth night touch */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #1e293b;
+  border-radius: 9999px;
+  height: 6px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #38bdf8;
+  cursor: pointer;
+  border: 2px solid #000000;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #38bdf8;
+  cursor: pointer;
+  border: 2px solid #000000;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
